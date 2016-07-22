@@ -226,7 +226,6 @@ def showContent(node):
     ancs = node.ancestors()
     querynode = ancs[1] # we want the query name, which is the 2nd ancestor... EC# is the first
 
-    print motifString
     
     # The next three ifs added by Kip to prevent crash when double clicking header
     # One might have sufficed unless something unexpected ends up in motifbox
@@ -926,8 +925,6 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
     glb.GUI.motifs['single'].update()
     
     keys = set()
-
-    print not glb.full_run
     
     if not glb.full_run or not glb.using_db:
     	if ecchoices[0] != '':

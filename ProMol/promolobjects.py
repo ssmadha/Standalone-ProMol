@@ -16,7 +16,7 @@ class Protein:
 
     def readMotifFile(self,filename):
         '''Read a ProMol motif file into this protein'''
-        self.name = filename.split('\\')[-1].rsplit('.',1)[0]
+        self.name = os.path.basename(filename).rsplit('.',1)[0]
         self.ec = self.name.split('_')[0]
         if self.name.split('_')[1].startswith('PF'):
             self.pfam = self.name.split('_')[1]
