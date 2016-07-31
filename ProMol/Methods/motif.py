@@ -889,6 +889,7 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
     glb.GUI.motifs['cancel'] = False
     #glb.GUI.motifs['motifbox'].delete(0,tk.END)
     glb.matchpairs = {}
+    glb.matchpairkeys = [] #This will ensure results are gone through in order later
     CSVMergeInfo = {}
     glb.GUI.motifs['csvprep'] = {}
     glb.GUI.motifs['cancelbutton']['state'] = tk.NORMAL
@@ -1045,6 +1046,7 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
         rmsdState=False#added 2/19
         for result in foundMotifs:
             glb.matchpairs[(pdb, result)] = found[result]
+            glb.matchpairkeys.append((pdb, result))
             
             #added 2/19
             if rmsdchoice is 1:
@@ -1104,7 +1106,7 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
     struct['children']=[]
     i = -1
         
-    for query, motif in glb.matchpairs.keys():
+    for query, motif in glb.matchpairkeys:
         if query != oldpdb:
             j = -1
             struct['children'].append({'type':'Section','name':query,'children':[]}) 
