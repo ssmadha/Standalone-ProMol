@@ -750,9 +750,9 @@ def exportCSVResults(searchStartTime, precisionFactor, motifSet, pdb, found, res
         else:
             motifrmsds = [-1,-1,-1]
         
-        pfam = resultdb[motif].pfam
-        residues = resultdb[motif].residues
-        ec = resultdb[motif].ec
+        pfam = resultdb[motif]['pfam']
+        residues = resultdb[motif]['residues']
+        ec = resultdb[motif]['ec']
         tmp = ec.split('.')
         same = {}
         motifline = True
@@ -779,12 +779,12 @@ def exportCSVResults(searchStartTime, precisionFactor, motifSet, pdb, found, res
             mot = mot[:-2]
             
             if lastpdb != pdb:
-            	csv.append('%s,%s"%s",%s,%f,%f,%f,%s'%(str(pdb),motif,pfam,str(ldr),round(float(motifrmsds[0]),4),round(float(motifrmsds[1]),4),round(float(motifrmsds[2]),4),res))
+            	csv.append('%s,%s"%s",%f,%f,%f,%s'%(str(pdb),motif,pfam,round(float(motifrmsds[0]),4),round(float(motifrmsds[1]),4),round(float(motifrmsds[2]),4),res))
             	lastpdb = pdb
             	motifline = False
             	continue
             if motifline:
-            	csv.append('%s,%s"%s",%s,%f,%f,%f,%s'%(str(pdb),motif,pfam,str(ldr),round(float(motifrmsds[0]),4),round(float(motifrmsds[1]),4),round(float(motifrmsds[2]),4),res))
+            	csv.append('%s,%s"%s",%f,%f,%f,%s'%(str(pdb),motif,pfam,round(float(motifrmsds[0]),4),round(float(motifrmsds[1]),4),round(float(motifrmsds[2]),4),res))
             	motifline = False
             	continue
             csv[-1] += ',%s'%(res)
@@ -1047,11 +1047,16 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
         for result in foundMotifs:
             glb.matchpairs[(pdb, result)] = found[result]
             glb.matchpairkeys.append((pdb, result))
+            motifName = result.strip()
+
+            glb.GUI.motifs['csvprep'][pdb][motifName] = {}
+            glb.GUI.motifs['csvprep'][pdb][motifName]['pfam'] = glb.MOTIFS[motifName].pfam
+            glb.GUI.motifs['csvprep'][pdb][motifName]['ec'] = glb.MOTIFS[motifName].ec
+            glb.GUI.motifs['csvprep'][pdb][motifName]['residues'] = [residue.name for residue in glb.MOTIFS[motifName].residues]
             
             #added 2/19
             if rmsdchoice is 1:
                 rmsdState = True
-                motifName = result.strip()
                 #if len(tag) > 1:
                 motif = glb.MOTIFS[motifName]                   
                 queryCode = pdb
@@ -1068,10 +1073,7 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
                     rmsd = -1
                     #data1 = cmd.align('match_in_%s'%(motifPDBCode), 'match_in_%s'%(queryCode))
                     #score = proutils.score(data1[0],proutils.levenshteinDistance(motifPDBCode,queryCode),data1[6])
-                glb.GUI.motifs['csvprep'][pdb][motifName] = {}
                 glb.GUI.motifs['csvprep'][pdb][motifName]['rmsd'] = rmsd
-                glb.GUI.motifs['csvprep'][pdb][motifName]['pfam'] = glb.MOTIFS[motifName].pfam
-                glb.GUI.motifs['csvprep'][pdb][motifName]['ec'] = glb.MOTIFS[motifName].ec
                 #glb.GUI.motifs['csvprep'][pdb][motifName]['score'] = score
                    
                 #count1 = count1+1
@@ -1086,6 +1088,8 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
             if not inDB:
         	if glb.full_run:
                     exportCSVResults(searchStartTime, glb.GUI.motifs['delta'].get(), motifSet, pdb, found, glb.GUI.motifs['csvprep'][pdb], rmsdState)
+        exportCSVResults(searchStartTime, glb.GUI.motifs['delta'].get(), motifSet, pdb, found, glb.GUI.motifs['csvprep'][pdb], rmsdState)
+
         if len(CSVMergeInfo) == 0:
             CSVMergeInfo['motif set short description'] = setName
             CSVMergeInfo['start time'] = searchStartTime

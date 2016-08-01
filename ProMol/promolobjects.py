@@ -168,6 +168,8 @@ Returns a Protein object that is the motif or False if the motif is not found'''
                 for j in range(i+1,len(motifResidues)):
                     hasDistance = False
                     motifDistance = motifResidues[i].distances[motifResidues[j]]
+                    if not focusedResidue.distances.has_key(motifResidues[j].name):
+                        break
                     for distance in focusedResidue.distances[motifResidues[j].name].keys():
                         if distance>motifDistance-tolerance and distance<motifDistance+tolerance:
                             hasDistance = True
