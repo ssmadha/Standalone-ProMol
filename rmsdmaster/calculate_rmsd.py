@@ -240,13 +240,17 @@ def get_coordinates_xyz(filename, ignore_hydrogens):
     V = np.array(V)
     return atoms, V
 
-def get_coordinates_protein(protein,ignore_hydrogens):
+def get_coordinates_protein(protein,ignore_hydrogens,onlyCACB,onlyCA):
     '''Extra method added by S. Madha to handle promol proteins'''
     V = []
     atoms = []
     for residue in protein.residues:
         for atom in residue.atoms:
             if ignore_hydrogens and atom.name=='H':
+                continue
+            if onlyCA and not atom.name.upper()=='CA':
+                continue
+            elif onlyCACB and not (atom.name.upper()=='CA' or atom.name.upper()=='CB'):
                 continue
             V.append(np.array([atom.coordinates.x,atom.coordinates.y,atom.coordinates.z]))
             atoms.append(atom.name)

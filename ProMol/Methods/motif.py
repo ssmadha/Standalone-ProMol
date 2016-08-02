@@ -1023,7 +1023,7 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
                 try:
                     proutils.align(motifProt,queryMatch)
                 except ValueError:
-                    print 'Motif %s appears to have an incorrect number of atoms in a residue, RMSD won\'t work correctly for it'%(motif)
+                    print 'Motif %s appears to have an incorrect number of atoms in a residue, RMSD ALL won\'t work correctly for it'%(motif)
                 found[motifStr] = queryMatch
             last += 1
             lasto += 1
@@ -1070,7 +1070,7 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
                     #score = proutils.score(data1[0],proutils.levenshteinDistance(motifPDBCode,queryCode),data1[6])
                 except Exception,e:
                     print e
-                    rmsd = -1
+                    rmsd = [-1,-1,-1]
                     #data1 = cmd.align('match_in_%s'%(motifPDBCode), 'match_in_%s'%(queryCode))
                     #score = proutils.score(data1[0],proutils.levenshteinDistance(motifPDBCode,queryCode),data1[6])
                 glb.GUI.motifs['csvprep'][pdb][motifName]['rmsd'] = rmsd
@@ -1080,6 +1080,7 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
                 #rmsdBar=(float(count1)/(len(pdbs)+len(found)-1))*100
                 #glb.GUI.motifs['rmsdstatus'].SetProgressPercent(rmsdBar)
                 #glb.GUI.motifs['rmsdlabel']['text'] = 'RMSD: {0}% complete'.format(int(rmsdBar))
+            del motifName
 
         # Export the single-PDB CSV file
         setName = "CDB_motifs" # could probably be more specific once there are more motifs, but this should do for now
@@ -1144,15 +1145,15 @@ def motifchecker(setChoice, rmsdchoice, ecchoices, pfamchoice):
         
         if rmsdchoice is 1:
             try:
-                struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'RMSD All:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifname]['rmsd'], 4))})
-##                if len(glb.GUI.motifs['csvprep'][query][motifName]['rmsd']) > 0:
-##                    struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'RMSD All:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifName]['rmsd'][0], 4))})
-##                if len(glb.GUI.motifs['csvprep'][query][motifName]['rmsd']) > 1:
-##                    struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'RMSD alpha:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifName]['rmsd'][1], 4))})
-##                if len(glb.GUI.motifs['csvprep'][query][motifName]['rmsd']) > 2:
-##                    struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'RMSD alpha & beta:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifName]['rmsd'][2], 4))})
-##                    if len(glb.GUI.motifs['csvprep'][query][motifName]['score']) > 0:
-##                        struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'Score:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifName]['score'], 4))})
+#                struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'RMSD All:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifname]['rmsd'], 4))})
+                if len(glb.GUI.motifs['csvprep'][query][motifname]['rmsd']) > 0:
+                    struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'RMSD All:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifname]['rmsd'][0], 4))})
+                if len(glb.GUI.motifs['csvprep'][query][motifname]['rmsd']) > 1:
+                    struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'RMSD alpha:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifname]['rmsd'][1], 4))})
+                if len(glb.GUI.motifs['csvprep'][query][motifname]['rmsd']) > 2:
+                    struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'RMSD alpha & beta:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifname]['rmsd'][2], 4))})
+##                    if len(glb.GUI.motifs['csvprep'][query][motifname]['score']) > 0:
+##                        struct['children'][i]['children'][subsection-1]['children'][j]['children'].append({'type':'Subsection','name':'Score:  '+ repr(round(glb.GUI.motifs['csvprep'][query][motifname]['score'], 4))})
             except:
                 print "indexing error at i = ", i, ", j = ", j, ", subsection = ", subsection
              
@@ -1571,6 +1572,9 @@ class MotifMaker:
         if self.makeMotifWrapper(self.openMotifForSaving, self.closeMotifForSaving):
             #print 'Motif {0} saved to user motifs folder with {1} amino acids.'.format(self.name, self.numberOfAcids)
             print 'Motif %s saved to user motifs folder with %s amino acids.'%(self.name, self.numberOfAcids)
+            glb.loadMotifs(glb.ALLMOTIFFOLDERS)
+            glb.makeIndexFiles(glb.ALLMOTIFFOLDERS)
+            glb.makeIndexDicts(glb.ALLMOTIFFOLDERS)
             return True
         else:
             return False

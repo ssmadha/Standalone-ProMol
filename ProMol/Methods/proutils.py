@@ -51,22 +51,39 @@ residue coordinates.'''
     # This code is modeled off the code in rmsd-master written by
     # Kromann and Bratholm, see that package (included) for details
     ignore_hydrogens = True
-    atomsM, M = calcrmsd.get_coordinates_protein(motif,ignore_hydrogens)
-    atomsQ, Q = calcrmsd.get_coordinates_protein(query,ignore_hydrogens)
+    onlyCACB = False
+    try:
+        atomsM, M = calcrmsd.get_coordinates_protein(motif,ignore_hydrogens,False,False)
+        atomsQ, Q = calcrmsd.get_coordinates_protein(query,ignore_hydrogens,False,False)
 
-    Mc = calcrmsd.centroid(M)
-    Qc = calcrmsd.centroid(Q)
-    M -= Mc
-    Q -= Qc
+        Mc = calcrmsd.centroid(M)
+        Qc = calcrmsd.centroid(Q)
+        M -= Mc
+        Q -= Qc
 
-    Q = calcrmsd.rotate(Q, M) #rotate the query residues onto the motif, so they line up when opened later
-    Q += Mc
+        Q = calcrmsd.rotate(Q, M) #rotate the query residues onto the motif, so they line up when opened later
+        Q += Mc
+    except Exception,e:
+        print e
+        onlyCACB = True
+        atomsM, M = calcrmsd.get_coordinates_protein(motif,ignore_hydrogens,True,False)
+        atomsQ, Q = calcrmsd.get_coordinates_protein(query,ignore_hydrogens,True,False)
+
+        Mc = calcrmsd.centroid(M)
+        Qc = calcrmsd.centroid(Q)
+        M -= Mc
+        Q -= Qc
+
+        Q = calcrmsd.rotate(Q, M) #rotate the query residues onto the motif, so they line up when opened later
+        Q += Mc
 
     #adjust the query residues so that the new coordinates are the correctly rotated on ones
     i = 0
     for residue in query.residues:
         for atom in residue.atoms:
             if ignore_hydrogens and atom.name=='H':
+                continue
+            elif onlyCACB and not (atom.name.upper()=='CA' or atom.name.upper()=='CB'):
                 continue
             atom.coordinates.x, atom.coordinates.y, atom.coordinates.z =        \
                                 [Q.item(i),Q.item(i+1),Q.item(i+2)]
@@ -77,10 +94,22 @@ def getRMSD(motif, query):
     # This code is modeled off the code in rmsd-master written by
     # Kromann and Bratholm, see that package (included) for details
     ignore_hydrogens = False
-    atomsM, M = calcrmsd.get_coordinates_protein(motif,ignore_hydrogens)
-    atomsQ, Q = calcrmsd.get_coordinates_protein(query,ignore_hydrogens)
+    try:
+        atomsM, M = calcrmsd.get_coordinates_protein(motif,ignore_hydrogens,False,False)
+        atomsQ, Q = calcrmsd.get_coordinates_protein(query,ignore_hydrogens,False,False)
+        rmsdall = calcrmsd.kabsch_rmsd(Q, M)
+    except Exception:
+        rmsdall = -1
+    finally:
+        atomsMab, Mab = calcrmsd.get_coordinates_protein(motif,ignore_hydrogens,True,False)
+        atomsQab, Qab = calcrmsd.get_coordinates_protein(query,ignore_hydrogens,True,False)
+        rmsdab = calcrmsd.kabsch_rmsd(Qab, Mab)
     
-    return calcrmsd.kabsch_rmsd(Q, M)
+        atomsMa, Ma = calcrmsd.get_coordinates_protein(motif,ignore_hydrogens,False,True)
+        atomsQa, Qa = calcrmsd.get_coordinates_protein(query,ignore_hydrogens,False,True)
+        rmsda = calcrmsd.kabsch_rmsd(Qa, Ma)
+    
+    return rmsdall,rmsda,rmsdab
 ##        #querySubsetName = 'match_in_{0}'.format(queryPDBCode)
 ##        querySubsetName = 'match_in_%s'%(queryPDBCode)
 ##        cmd.select(querySubsetName, motifName)

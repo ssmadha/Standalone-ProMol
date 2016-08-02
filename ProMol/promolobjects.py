@@ -48,6 +48,7 @@ class Protein:
                         float(line[46:54].strip()),                         \
                         line[76:78].strip(),line)
             residue.atoms.append(atom)
+            residue.atomnames.add(atom.name)
             if atom.name=="CA":
                 residue.setCACoordinates(float(line[30:38].strip()),        \
                                          float(line[38:46].strip()),        \
@@ -100,6 +101,8 @@ class Protein:
                 #ignore water, who needs that?
                 continue                
             elif not line.startswith("ATOM") and not line.startswith("HETATM"):
+                continue
+            elif line[16]!=' ' and line[16]!='A': #eliminate confusion when there is mre than one conformation to an atom
                 continue
             elif identifier=="":
                 identifier = line[21:26].strip()
@@ -183,6 +186,8 @@ Returns a Protein object that is the motif or False if the motif is not found'''
                 focusedResidue = focusedResidue.distances[motifResidues[i+1].name][nextResidueDistance]
                 foundResidues.append(focusedResidue)
             if len(foundResidues)==len(motifResidues): #i.e., all residues found
+                for i in range(len(foundResidues)):
+                    foundResidues[i].atoms = [atom for atom in foundResidues[i].atoms if atom.name in motifResidues[i].atomnames]
                 result = Protein()
                 result.name = self.name
                 result.pfam = motif.pfam
@@ -225,6 +230,7 @@ class Residue:
         self.atoms = list()
         self.CACoordinates = None
         self.distances = {}
+        self.atomnames = set() #should only be used with motifs
 
     def setCACoordinates(self,x,y,z):
         '''Sets the carbon alpha coordinates of this residue'''
