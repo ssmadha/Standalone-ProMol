@@ -30,9 +30,9 @@ class Protein:
         pdbfile.close()
         identifier = lines[0][21:26].strip()
         residue = Residue(lines[0][17:20].strip(),int(lines[0][22:26].strip()),lines[0][21])
-        residue.setCACoordinates(float(line[30:38].strip()),                \
-                                 float(line[38:46].strip()),                \
-                                 float(line[46:54].strip()))
+        residue.setCACoordinates(float(lines[0][30:38].strip()),                \
+                                 float(lines[0][38:46].strip()),                \
+                                 float(lines[0][46:54].strip()))
         # for future reference: info on coordinate pdb file formatting can be
         # found at http://deposit.rcsb.org/adit/docs/pdb_atom_format.html
         for line in lines:
